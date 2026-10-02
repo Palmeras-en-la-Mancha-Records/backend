@@ -12,12 +12,12 @@ def get_db():
     finally:
         db.close()
 
-# Esto crea el archivo de la base de datos y la tabla de filiales
+# This creates the database file and the subsidiaries table
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Palmeras en la Mancha API")
 
-# Permisos para que el frontend pueda hablar con este backend
+# Permissions for the frontend to communicate with this backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
