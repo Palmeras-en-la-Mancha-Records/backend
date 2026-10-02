@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config.config_variable import APP_TITLE, APP_VERSION, APP_DESCRIPTION
-from routes.label_routes import label_routes
+from routes.label_routes import router as label_routes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
