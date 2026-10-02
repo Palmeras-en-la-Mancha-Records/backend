@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends
+
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import models, schemas
@@ -37,3 +38,28 @@ def create_branch(branch: schemas.BranchCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_branch)
     return db_branch
+
+@app.put("/branches/{branch_id}", response_model=schemas.BranchResponse)
+def update_branch(branch_id: int, branch: schemas.BranchCreate, db: Session = Depends(get_db)):
+    db_branch = db.query(models.Branch).filter(models.Branch.id == branch_id).first()
+    
+    if db_branch is None:
+        raise HTTPException(status_code=404, detail="Tienda no encontrada")
+
+    for key, value in branch.model_dump().items():
+        setattr(db_branch, key, value)
+        
+    db.commit()
+    db.refresh(db_branch)
+    return db_branch
+
+@app.delete("/branches/{branch_id}")
+def delete_branch(branch_id: int, db: Session = Depends(get_db)):
+    db_branch = db.query(models.Branch).filter(models.Branch.id == branch_id).first()
+    
+    if db_branch is None:
+        raise HTTPException(status_code=404, detail="Tienda no encontrada")
+        
+    db.delete(db_branch)
+    db.commit()
+    return {"message": "Tienda eliminada correctamente"}
