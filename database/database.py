@@ -1,7 +1,7 @@
 from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
-from config.config_variables import DATABASE_URL
+from config.config_variable import DATABASE_URL
 from sqlalchemy import event
 
 
