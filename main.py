@@ -1,7 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-import models
-from database import engine
+from sqlalchemy.orm import Session
+import models, schemas
+from database import engine, SessionLocal
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Esto crea el archivo de la base de datos y la tabla de filiales
 models.Base.metadata.create_all(bind=engine)
@@ -17,6 +25,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-def read_root():
-    return {"message": "API de Palmeras en la Mancha Records funcionando"}
+@app.get("/branches/", response_model=list[schemas.BranchResponse])
+def read_branches(db: Session = Depends(get_db)):
+    branches = db.query(models.Branch).all()
+    return branches
+
+@app.post("/branches/", response_model=schemas.BranchResponse)
+def create_branch(branch: schemas.BranchCreate, db: Session = Depends(get_db)):
+    db_branch = models.Branch(**branch.model_dump())
+    db.add(db_branch)
+    db.commit()
+    db.refresh(db_branch)
+    return db_branch
