@@ -1,17 +1,18 @@
+# Imports
 from pydantic import BaseModel, ConfigDict, Field
 
-
+# Schemas
 class FormatBase(BaseModel):
     name: str = Field(
         ...,
         min_length=2,
         max_length=100,
-        description="Nombre del formato físico"
+        description="Physical format name"
     )
     description: str | None = Field(
         default=None,
         max_length=255,
-        description="Descripción del formato"
+        description="Format description"
     )
 
 
@@ -24,12 +25,12 @@ class FormatUpdate(BaseModel):
         default=None,
         min_length=2,
         max_length=100,
-        description="Nombre del formato físico"
+        description="Physical format name"
     )
     description: str | None = Field(
         default=None,
         max_length=255,
-        description="Descripción del formato"
+        description="Format description"
     )
 
 

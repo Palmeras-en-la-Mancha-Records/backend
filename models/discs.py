@@ -1,6 +1,8 @@
+# Imports
 from sqlalchemy import Column, Integer, String, Float
 from core.database import Base
 
+# Models
 class Disc(Base):
     __tablename__ = "discs"
 

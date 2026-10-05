@@ -1,7 +1,8 @@
+# Imports
 import os
 from dotenv import load_dotenv
 
-# Carga las variables de entorno desde el archivo .env (.env debe estar en la raíz de backend)
+# Environment Configuration
 load_dotenv()
 
 class Settings:
