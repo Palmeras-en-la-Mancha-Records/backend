@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import models.models as models, schemas.schemas as schemas
 from core.database import engine, SessionLocal
+from core.config import settings
 
 def get_db():
     db = SessionLocal()
@@ -15,7 +16,7 @@ def get_db():
 # Esto crea el archivo de la base de datos y la tabla de filiales
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Palmeras en la Mancha API")
+app = FastAPI(title=settings.PROJECT_NAME)
 
 # Permisos para que el frontend pueda hablar con este backend
 app.add_middleware(
