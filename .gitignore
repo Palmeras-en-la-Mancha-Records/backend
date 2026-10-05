@@ -1,4 +1,6 @@
 venv/
 __pycache__/
 *.db
-.env
+.env
+.env.*
+!.env.example
