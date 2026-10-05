@@ -2,19 +2,18 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-import models.models as models, schemas.schemas as schemas
-from core.database import engine, SessionLocal
+
+from core.database import Base, engine, get_db
 from core.config import settings
+import models.models as models
+import models.formats as format_models
+import models.discs as disc_models
+import schemas.schemas as schemas
+from routers.discs import router as discs_router
+from routers.formats import router as formats_router
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-# Esto crea el archivo de la base de datos y la tabla de filiales
-models.Base.metadata.create_all(bind=engine)
+# Esto crea todas las tablas en la base de datos (branches, formats, discs)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -26,6 +25,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Registrar routers modulares
+app.include_router(discs_router)
+app.include_router(formats_router)
 
 @app.get("/branches/", response_model=list[schemas.BranchResponse])
 def read_branches(db: Session = Depends(get_db)):
