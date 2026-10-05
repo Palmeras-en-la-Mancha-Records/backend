@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from core.database import get_db
 import models.models as models
-import schemas.schemas as schemas
+import schemas.branches as schemas
 
 router = APIRouter(prefix="/branches", tags=["Branches"])
 
@@ -14,7 +14,7 @@ def read_branches(db: Session = Depends(get_db)):
     return branches
 
 
-@router.post("/", response_model=schemas.BranchResponse)
+@router.post("/", response_model=schemas.BranchResponse, status_code=201)
 def create_branch(branch: schemas.BranchCreate, db: Session = Depends(get_db)):
     db_branch = models.Branch(**branch.model_dump())
     db.add(db_branch)
