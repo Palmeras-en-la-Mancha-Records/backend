@@ -8,7 +8,6 @@ from core.config import settings
 import models.models as models
 import models.formats as format_models
 import models.discs as disc_models
-import schemas.schemas as schemas
 from routers.discs import router as discs_router
 from routers.formats import router as formats_router
 from routers.branches import router as branches_router
