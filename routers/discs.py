@@ -1,3 +1,4 @@
+# Imports
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
@@ -11,20 +12,21 @@ from services.discs_services import (
     update_disc,
 )
 
+# Router Configuration
 router = APIRouter(
     prefix="/discs",
     tags=["Discs"]
 )
 
-
+# Endpoints
 @router.get(
     "/",
     response_model=list[DiscResponse],
     status_code=status.HTTP_200_OK
 )
 def read_discs(
-    genre: str | None = Query(default=None, description="Filtrar por género"),
-    search: str | None = Query(default=None, description="Buscar por título o artista"),
+    genre: str | None = Query(default=None, description="Filter by genre"),
+    search: str | None = Query(default=None, description="Search by title or artist"),
     db: Session = Depends(get_db)
 ):
     return get_discs(db, genre=genre, search=search)
@@ -43,7 +45,7 @@ def read_disc(
     if disc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Disco no encontrado"
+            detail="Disc not found"
         )
     return disc
 
@@ -74,7 +76,7 @@ def update_existing_disc(
     if disc is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Disco no encontrado"
+            detail="Disc not found"
         )
     return disc
 
@@ -91,8 +93,8 @@ def delete_existing_disc(
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Disco no encontrado"
+            detail="Disc not found"
         )
     return {
-        "message": "Disco eliminado correctamente"
+        "message": "Disc successfully deleted"
     }

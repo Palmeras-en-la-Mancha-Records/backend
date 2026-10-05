@@ -1,10 +1,11 @@
+# Imports
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 from models.discs import Disc
 from schemas.discs import DiscCreate, DiscUpdate
 
-
+# Read Services
 def get_discs(
     db: Session,
     genre: str | None = None,
@@ -30,7 +31,7 @@ def get_discs(
 def get_disc(db: Session, disc_id: int) -> Disc | None:
     return db.query(Disc).filter(Disc.id == disc_id).first()
 
-
+# Write Services
 def create_disc(db: Session, disc_data: DiscCreate) -> Disc:
     new_disc = Disc(**disc_data.model_dump())
     db.add(new_disc)
