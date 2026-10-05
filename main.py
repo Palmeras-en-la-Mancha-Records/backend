@@ -1,24 +1,23 @@
-
+# Imports
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-import models.models as models, schemas.schemas as schemas
-from core.database import engine, SessionLocal
+
+from core.database import Base, engine, get_db
 from core.config import settings
+import models.models as models
+import models.formats as format_models
+import models.discs as disc_models
+import schemas.schemas as schemas
+from routers.discs import router as discs_router
+from routers.formats import router as formats_router
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Database Initialization
+Base.metadata.create_all(bind=engine)
 
-# This creates the database file and the subsidiaries table
-models.Base.metadata.create_all(bind=engine)
-
+# FastAPI Application & Middleware Configuration
 app = FastAPI(title=settings.PROJECT_NAME)
 
-# Permissions for the frontend to communicate with this backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -27,6 +26,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Router Registration
+app.include_router(discs_router)
+app.include_router(formats_router)
+
+# Branch Endpoints
 @app.get("/branches/", response_model=list[schemas.BranchResponse])
 def read_branches(db: Session = Depends(get_db)):
     branches = db.query(models.Branch).all()
@@ -45,7 +49,7 @@ def update_branch(branch_id: int, branch: schemas.BranchCreate, db: Session = De
     db_branch = db.query(models.Branch).filter(models.Branch.id == branch_id).first()
     
     if db_branch is None:
-        raise HTTPException(status_code=404, detail="Tienda no encontrada")
+        raise HTTPException(status_code=404, detail="Store not found")
 
     for key, value in branch.model_dump().items():
         setattr(db_branch, key, value)
@@ -59,8 +63,8 @@ def delete_branch(branch_id: int, db: Session = Depends(get_db)):
     db_branch = db.query(models.Branch).filter(models.Branch.id == branch_id).first()
     
     if db_branch is None:
-        raise HTTPException(status_code=404, detail="Tienda no encontrada")
+        raise HTTPException(status_code=404, detail="Store not found")
         
     db.delete(db_branch)
     db.commit()
-    return {"message": "Tienda eliminada correctamente"}
+    return {"message": "Store successfully deleted"}

@@ -1,5 +1,7 @@
-from pydantic import BaseModel
+# Imports
+from pydantic import BaseModel, ConfigDict
 
+# Schemas
 class BranchBase(BaseModel):
     name: str
     address: str
@@ -11,5 +13,4 @@ class BranchCreate(BranchBase):
 class BranchResponse(BranchBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

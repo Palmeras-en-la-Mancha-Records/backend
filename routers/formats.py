@@ -1,3 +1,4 @@
+# Imports
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -15,13 +16,13 @@ from services.formats_services import (
     update_format
 )
 
-
+# Router Configuration
 router = APIRouter(
     prefix="/formats",
     tags=["Formats"]
 )
 
-
+# Endpoints
 @router.get(
     "/",
     response_model=list[FormatResponse],
