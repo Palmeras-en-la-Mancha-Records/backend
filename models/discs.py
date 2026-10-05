@@ -13,4 +13,6 @@ class Disc(Base):
     genre = Column(String, index=True, nullable=True)
     record_label = Column(String, nullable=True)
     price = Column(Float, nullable=False, default=0.0)
+    stock = Column(Integer, nullable=True, default=0)
+    format_id = Column(Integer, nullable=True)
     cover_image_url = Column(String, nullable=True)
