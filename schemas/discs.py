@@ -9,6 +9,8 @@ class DiscBase(BaseModel):
     genre: str | None = Field(default=None, max_length=100, description="Musical genre")
     record_label: str | None = Field(default=None, max_length=100, description="Record label")
     price: float = Field(default=0.0, ge=0.0, description="Disc price")
+    stock: int | None = Field(default=0, ge=0, description="Available stock")
+    format_id: int | None = Field(default=None, description="Format identifier")
     cover_image_url: str | None = Field(default=None, description="Cover image URL or path")
 
 class DiscCreate(DiscBase):
@@ -21,6 +23,8 @@ class DiscUpdate(BaseModel):
     genre: str | None = Field(default=None, max_length=100)
     record_label: str | None = Field(default=None, max_length=100)
     price: float | None = Field(default=None, ge=0.0)
+    stock: int | None = Field(default=None, ge=0)
+    format_id: int | None = None
     cover_image_url: str | None = None
 
 class DiscResponse(DiscBase):
