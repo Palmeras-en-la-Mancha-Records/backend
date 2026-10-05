@@ -4,9 +4,9 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from model.label_model import Label
-from schema.label_schema import LabelBase, LabelCreate, LabelUpdate, LabelResponse
+from schema.label_schema import LabelCreate, LabelUpdate
 
-def get_all_labels(db: Session, skip: int = 0, limit: int = 100) -> List[LabelResponse]:
+def get_all_labels(db: Session, skip: int = 0, limit: int = 100) -> List[Label]:
     try:
         return db.query(Label).offset(skip).limit(limit).all()
     except SQLAlchemyError as error:
@@ -40,7 +40,7 @@ def create_label(db: Session, label: LabelCreate) -> Label:
             detail=f"Error creating label: {str(error)}"
         )
 
-def get_label_by_id(db: Session, label_id: int) -> LabelResponse:
+def get_label_by_id(db: Session, label_id: int) -> Label:
     try:
         label = db.query(Label).filter(Label.id == label_id).first()
         if not label:
@@ -77,13 +77,12 @@ def update_label(db: Session, label_id: int, label_update: LabelUpdate) -> Label
             detail=f"Error updating label: {str(error)}"
         )
 
-def delete_label(db: Session, label_id: int) -> dict:
-    db_label = get_label_by_id(db, label_id)  # ya lanza el 404 si no existe
+def delete_label(db: Session, label_id: int) -> None:
+    db_label = get_label_by_id(db, label_id)
 
     try:
         db.delete(db_label)
         db.commit()
-        return {"detail": f"Label with id {label_id} deleted successfully"}
     except SQLAlchemyError as error:
         db.rollback()
         raise HTTPException(

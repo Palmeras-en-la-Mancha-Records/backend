@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends, Query, Path, status
 from sqlalchemy.orm import Session
 
 from database.database import get_db
-from model.label_model import Label
 from schema.label_schema import LabelCreate, LabelResponse, LabelUpdate
 import controller.label_controller as label_controller
 
@@ -73,4 +72,4 @@ def delete_existing_label(
     label_id: int = Path(..., ge=1, description="The ID of the label to delete"),
     db: Session = Depends(get_db)
 ):
-    return label_controller.delete_label(db=db, label_id=label_id)
+    label_controller.delete_label(db=db, label_id=label_id)

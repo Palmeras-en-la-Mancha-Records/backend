@@ -10,9 +10,8 @@ class LabelCreate(LabelBase):
     pass
 
 class LabelUpdate(LabelBase):
-    name: Optional[str] = Field(None, min_length=1, max_length=150, example="Sony Music")
-    country: Optional[str] = Field(None, min_length=1, max_length=100, example="España")
-    website: Optional[str] = Field(None, min_length=1, max_length=300, example="https://www.sonymusic.es/")
+    # PUT = reemplazo del recurso, por eso se exige 'name' (no es un PATCH parcial)
+    pass
 
 class LabelResponse(LabelBase):
     id: int = Field(..., description="The unique identifier of the label", example=1)
