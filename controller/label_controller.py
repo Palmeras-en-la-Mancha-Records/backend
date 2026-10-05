@@ -16,7 +16,6 @@ def get_all_labels(db: Session, skip: int = 0, limit: int = 100) -> List[LabelRe
         )
 
 def create_label(db: Session, label: LabelCreate) -> Label:
-
     new_label = Label(
         name=label.name,
         country=label.country,
@@ -57,26 +56,14 @@ def get_label_by_id(db: Session, label_id: int) -> LabelResponse:
         )
 
 def update_label(db: Session, label_id: int, label_update: LabelUpdate) -> Label:
-
-    db.director = get_label_by_id(db, label_id)
-
-    update_data = label_update.model_dump(exclude_unset=True)
-
-    for field, value in update_data.items():
-        setattr(db.director, field, value)
+    db_label = get_label_by_id(db, label_id)
 
     try:
-        label = db.query(Label).filter(Label.id == label_id).first()
-        if not label:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Label with id {label_id} not found"
-            )
-        for key, value in update_data.items():
-            setattr(label, key, value)
+        for field, value in label_update.model_dump(exclude_unset=True).items():
+            setattr(db_label, field, value)
         db.commit()
-        db.refresh(label)
-        return label
+        db.refresh(db_label)
+        return db_label
     except IntegrityError as error:
         db.rollback()
         raise HTTPException(
@@ -91,18 +78,12 @@ def update_label(db: Session, label_id: int, label_update: LabelUpdate) -> Label
         )
 
 def delete_label(db: Session, label_id: int) -> dict:
-
-    db.director = get_label_by_id(db, label_id)
+    db_label = get_label_by_id(db, label_id)  # ya lanza el 404 si no existe
 
     try:
-        label = db.query(Label).filter(Label.id == label_id).first()
-        if not label:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Label with id {label_id} not found"
-            )
-        db.delete(label)
+        db.delete(db_label)
         db.commit()
+        return {"detail": f"Label with id {label_id} deleted successfully"}
     except SQLAlchemyError as error:
         db.rollback()
         raise HTTPException(

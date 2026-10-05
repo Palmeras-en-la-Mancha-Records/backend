@@ -48,7 +48,7 @@ def create_new_label(
     label_data: LabelCreate,
     db: Session = Depends(get_db)
 ):
-    return label_controller.create_label(db=db, label_data=label_data)
+    return label_controller.create_label(db=db, label=label_data)
 
 @router.put(
     "/{label_id}",
@@ -61,7 +61,7 @@ def update_existing_label(
     label_id: int = Path(..., ge=1, description="The ID of the label to update"),
     db: Session = Depends(get_db)
 ):
-    return label_controller.update_label(db=db, label_id=label_id, label_data=label_data)
+    return label_controller.update_label(db=db, label_id=label_id, label_update=label_data)
 
 @router.delete(
     "/{label_id}",
