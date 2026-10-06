@@ -41,13 +41,7 @@ def read_album(
     album_id: int,
     db: Session = Depends(get_db)
 ):
-    album = get_album(db, album_id)
-    if album is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Album not found"
-        )
-    return album
+    return get_album(db, album_id)
 
 
 @router.post(
