@@ -14,7 +14,21 @@ class AlbumBase(BaseModel):
     cover_image_url: str | None = Field(default=None, description="Cover image URL or path")
 
 class AlbumCreate(AlbumBase):
-    pass
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "title": "El Madrileño",
+                "artist": "C. Tangana",
+                "release_year": 2021,
+                "genre": "Pop / Fusión Urbana",
+                "record_label": "Sony Music Spain",
+                "price": 24.99,
+                "stock": 10,
+                "format_id": 1,
+                "cover_image_url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500"
+            }
+        }
+    )
 
 class AlbumUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=150)
