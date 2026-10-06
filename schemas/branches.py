@@ -10,6 +10,11 @@ class BranchBase(BaseModel):
 class BranchCreate(BranchBase):
     pass
 
+class BranchUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    address: str | None = Field(default=None, min_length=1, max_length=255)
+    phone: str | None = Field(default=None, min_length=1, max_length=30)
+
 class BranchResponse(BranchBase):
     id: int
 

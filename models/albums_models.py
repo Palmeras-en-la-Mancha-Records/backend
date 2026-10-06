@@ -1,5 +1,5 @@
 # Imports
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from core.database import Base
 
 # Models
@@ -14,7 +14,7 @@ class Album(Base):
     record_label = Column(String, nullable=True)
     price = Column(Float, nullable=False, default=0.0)
     stock = Column(Integer, nullable=True, default=0)
-    format_id = Column(Integer, nullable=True)
+    format_id = Column(Integer, ForeignKey("formats.id"), nullable=True)
     cover_image_url = Column(String, nullable=True)
 
 # Aliases for backwards compatibility

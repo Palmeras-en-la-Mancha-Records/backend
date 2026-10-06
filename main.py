@@ -1,18 +1,16 @@
 # Imports
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.database import Base, engine, SessionLocal
 from core.config import settings
-import models.models as models
-import models.formats as format_models
-import models.albums as album_models
+import models.branches_models as branch_models
+import models.formats_models as format_models
+import models.albums_models as album_models
 from routers.albums import router as albums_router, discs_router
 from routers.formats import router as formats_router
 from routers.branches import router as branches_router
-
-# Database Initialization
-Base.metadata.create_all(bind=engine)
 
 # Database Initial Seeding
 def seed_initial_data():
@@ -33,10 +31,18 @@ def seed_initial_data():
     finally:
         db.close()
 
-seed_initial_data()
+# Application Lifespan Configuration
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    seed_initial_data()
+    yield
 
 # FastAPI Application & Middleware Configuration
-app = FastAPI(title=settings.PROJECT_NAME)
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    lifespan=lifespan
+)
 
 app.add_middleware(
     CORSMiddleware,

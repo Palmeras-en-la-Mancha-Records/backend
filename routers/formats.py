@@ -8,7 +8,7 @@ from schemas.formats import (
     FormatResponse,
     FormatUpdate
 )
-from services.formats_services import (
+from controller.formats_controller import (
     create_format,
     delete_format,
     get_format,
