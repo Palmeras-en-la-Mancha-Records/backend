@@ -1,7 +1,7 @@
 # Imports
 from sqlalchemy.orm import Session
 
-from models.formats import Format
+from models.formats_models import Format
 from schemas.formats import FormatCreate, FormatUpdate
 
 # Read Services

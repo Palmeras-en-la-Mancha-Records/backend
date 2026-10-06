@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from models.albums import Album
+from models.albums_models import Album
 from schemas.albums import AlbumCreate, AlbumUpdate
 
 # Read Services
