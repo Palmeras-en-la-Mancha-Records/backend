@@ -3,8 +3,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from model.label_model import Label
-from schema.label_schema import LabelCreate, LabelUpdate
+from models.labels_models import Label
+from schemas.labels import LabelCreate, LabelUpdate
 
 def get_all_labels(db: Session, skip: int = 0, limit: int = 100) -> List[Label]:
     try:
