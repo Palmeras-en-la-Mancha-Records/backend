@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from core.database import get_db
 from schemas.albums import AlbumCreate, AlbumResponse, AlbumUpdate
-from services.albums_services import (
+from controler.albums_controler import (
     create_album,
     delete_album,
     get_album,
