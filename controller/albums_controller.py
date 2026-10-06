@@ -5,7 +5,7 @@ from sqlalchemy import or_
 from models.albums_models import Album
 from schemas.albums import AlbumCreate, AlbumUpdate
 
-# Read Services
+# Read Operations
 def get_albums(
     db: Session,
     genre: str | None = None,
@@ -31,7 +31,7 @@ def get_albums(
 def get_album(db: Session, album_id: int) -> Album | None:
     return db.query(Album).filter(Album.id == album_id).first()
 
-# Write Services
+# Write Operations
 def create_album(db: Session, album_data: AlbumCreate) -> Album:
     new_album = Album(**album_data.model_dump())
     db.add(new_album)
