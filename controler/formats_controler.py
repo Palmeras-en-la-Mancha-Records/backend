@@ -1,9 +1,10 @@
+# Imports
 from sqlalchemy.orm import Session
 
 from models.formats import Format
 from schemas.formats import FormatCreate, FormatUpdate
 
-
+# Read Services
 def get_formats(db: Session) -> list[Format]:
     return db.query(Format).order_by(Format.id).all()
 
@@ -24,6 +25,7 @@ def get_format_by_name(
         .first()
     )
 
+# Write Services
 def create_format(
     db: Session,
     format_data: FormatCreate

@@ -1,6 +1,8 @@
+# Imports
 from sqlalchemy import Column, Integer, String
 from core.database import Base
 
+# Models
 class Format(Base):
     __tablename__ = "formats"
 

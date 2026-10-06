@@ -1,23 +1,49 @@
-
-from fastapi import FastAPI, Depends, HTTPException
+# Imports
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 
-from core.database import Base, engine, get_db
+from core.database import Base, engine, SessionLocal
 from core.config import settings
-import models.models as models
+import models.branches as branch_models
 import models.formats as format_models
-import models.discs as disc_models
-import schemas.schemas as schemas
-from routers.discs import router as discs_router
+import models.albums as album_models
+from routers.albums import router as albums_router, discs_router
 from routers.formats import router as formats_router
+from routers.branches import router as branches_router
 
-# Esto crea todas las tablas en la base de datos (branches, formats, discs)
-Base.metadata.create_all(bind=engine)
+# Database Initial Seeding
+def seed_initial_data():
+    db = SessionLocal()
+    try:
+        if db.query(format_models.Format).count() == 0:
+            default_formats = [
+                format_models.Format(name="Vinilo LP", description="Edicion estandar en vinilo 12 pulgadas"),
+                format_models.Format(name="CD Digipak", description="Edicion en disco compacto digipak"),
+                format_models.Format(name="Cassette", description="Cinta de cassette vintage analogica"),
+                format_models.Format(name="Vinilo 7 Single", description="Single de 7 pulgadas a 45 RPM"),
+            ]
+            db.add_all(default_formats)
+            db.commit()
+    except Exception as error:
+        db.rollback()
+        print(f"Error seeding initial formats: {error}")
+    finally:
+        db.close()
 
-app = FastAPI(title=settings.PROJECT_NAME)
+# Application Lifespan Configuration
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    seed_initial_data()
+    yield
 
-# Permisos para que el frontend pueda hablar con este backend
+# FastAPI Application & Middleware Configuration
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    lifespan=lifespan
+)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -26,44 +52,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Registrar routers modulares
+# Router Registration
+app.include_router(albums_router)
 app.include_router(discs_router)
 app.include_router(formats_router)
-
-@app.get("/branches/", response_model=list[schemas.BranchResponse])
-def read_branches(db: Session = Depends(get_db)):
-    branches = db.query(models.Branch).all()
-    return branches
-
-@app.post("/branches/", response_model=schemas.BranchResponse)
-def create_branch(branch: schemas.BranchCreate, db: Session = Depends(get_db)):
-    db_branch = models.Branch(**branch.model_dump())
-    db.add(db_branch)
-    db.commit()
-    db.refresh(db_branch)
-    return db_branch
-
-@app.put("/branches/{branch_id}", response_model=schemas.BranchResponse)
-def update_branch(branch_id: int, branch: schemas.BranchCreate, db: Session = Depends(get_db)):
-    db_branch = db.query(models.Branch).filter(models.Branch.id == branch_id).first()
-    
-    if db_branch is None:
-        raise HTTPException(status_code=404, detail="Tienda no encontrada")
-
-    for key, value in branch.model_dump().items():
-        setattr(db_branch, key, value)
-        
-    db.commit()
-    db.refresh(db_branch)
-    return db_branch
-
-@app.delete("/branches/{branch_id}")
-def delete_branch(branch_id: int, db: Session = Depends(get_db)):
-    db_branch = db.query(models.Branch).filter(models.Branch.id == branch_id).first()
-    
-    if db_branch is None:
-        raise HTTPException(status_code=404, detail="Tienda no encontrada")
-        
-    db.delete(db_branch)
-    db.commit()
-    return {"message": "Tienda eliminada correctamente"}
+app.include_router(branches_router)
