@@ -7,7 +7,7 @@ from alembic import context
 
 from config.config_variable import DATABASE_URL
 from database.database import Base
-import model  # noqa: F401  (registra los modelos en Base.metadata)
+import models  # noqa: F401  (registra los modelos en Base.metadata)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
