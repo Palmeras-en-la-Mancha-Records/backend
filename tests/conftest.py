@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from core.database import Base, get_db
-import models.formats as format_models
+import models.formats_models as format_models
 from main import app
 
 # Test Database Configuration

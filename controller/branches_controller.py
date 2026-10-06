@@ -1,7 +1,7 @@
 # Imports
 from sqlalchemy.orm import Session
 
-from models.branches import Branch
+from models.branches_models import Branch
 from schemas.branches import BranchCreate, BranchUpdate
 
 # Read Operations
