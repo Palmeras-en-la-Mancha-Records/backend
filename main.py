@@ -1,17 +1,15 @@
 # Imports
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
 
-from core.database import Base, engine, get_db
+from core.database import Base, engine
 from core.config import settings
 import models.models as models
 import models.formats as format_models
-import models.discs as disc_models
-from routers.discs import router as discs_router
+import models.albums as album_models
+from routers.albums import router as albums_router, discs_router
 from routers.formats import router as formats_router
 from routers.branches import router as branches_router
-
 
 # Database Initialization
 Base.metadata.create_all(bind=engine)
@@ -28,7 +26,7 @@ app.add_middleware(
 )
 
 # Router Registration
+app.include_router(albums_router)
 app.include_router(discs_router)
 app.include_router(formats_router)
 app.include_router(branches_router)
-

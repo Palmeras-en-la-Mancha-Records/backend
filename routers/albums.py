@@ -3,98 +3,106 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from core.database import get_db
-from schemas.discs import DiscCreate, DiscResponse, DiscUpdate
-from services.discs_services import (
-    create_disc,
-    delete_disc,
-    get_disc,
-    get_discs,
-    update_disc,
+from schemas.albums import AlbumCreate, AlbumResponse, AlbumUpdate
+from services.albums_services import (
+    create_album,
+    delete_album,
+    get_album,
+    get_albums,
+    update_album,
 )
 
 # Router Configuration
 router = APIRouter(
-    prefix="/discs",
-    tags=["Discs"]
+    prefix="/albums",
+    tags=["Albums"]
 )
 
 # Endpoints
 @router.get(
     "/",
-    response_model=list[DiscResponse],
+    response_model=list[AlbumResponse],
     status_code=status.HTTP_200_OK
 )
-def read_discs(
+def read_albums(
     genre: str | None = Query(default=None, description="Filter by genre"),
     search: str | None = Query(default=None, description="Search by title or artist"),
     db: Session = Depends(get_db)
 ):
-    return get_discs(db, genre=genre, search=search)
+    return get_albums(db, genre=genre, search=search)
 
 
 @router.get(
-    "/{disc_id}",
-    response_model=DiscResponse,
+    "/{album_id}",
+    response_model=AlbumResponse,
     status_code=status.HTTP_200_OK
 )
-def read_disc(
-    disc_id: int,
+def read_album(
+    album_id: int,
     db: Session = Depends(get_db)
 ):
-    disc = get_disc(db, disc_id)
-    if disc is None:
+    album = get_album(db, album_id)
+    if album is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Disc not found"
+            detail="Album not found"
         )
-    return disc
+    return album
 
 
 @router.post(
     "/",
-    response_model=DiscResponse,
+    response_model=AlbumResponse,
     status_code=status.HTTP_201_CREATED
 )
-def create_new_disc(
-    disc_data: DiscCreate,
+def create_new_album(
+    album_data: AlbumCreate,
     db: Session = Depends(get_db)
 ):
-    return create_disc(db, disc_data)
+    return create_album(db, album_data)
 
 
 @router.put(
-    "/{disc_id}",
-    response_model=DiscResponse,
+    "/{album_id}",
+    response_model=AlbumResponse,
     status_code=status.HTTP_200_OK
 )
-def update_existing_disc(
-    disc_id: int,
-    disc_data: DiscUpdate,
+def update_existing_album(
+    album_id: int,
+    album_data: AlbumUpdate,
     db: Session = Depends(get_db)
 ):
-    disc = update_disc(db, disc_id, disc_data)
-    if disc is None:
+    album = update_album(db, album_id, album_data)
+    if album is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Disc not found"
+            detail="Album not found"
         )
-    return disc
+    return album
 
 
 @router.delete(
-    "/{disc_id}",
+    "/{album_id}",
     status_code=status.HTTP_200_OK
 )
-def delete_existing_disc(
-    disc_id: int,
+def delete_existing_album(
+    album_id: int,
     db: Session = Depends(get_db)
 ):
-    deleted = delete_disc(db, disc_id)
+    deleted = delete_album(db, album_id)
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Disc not found"
+            detail="Album not found"
         )
     return {
-        "message": "Disc successfully deleted"
+        "message": "Album successfully deleted"
     }
+
+# Backwards compatibility router for /discs
+discs_router = APIRouter(prefix="/discs", tags=["Discs (Legacy)"])
+discs_router.add_api_route("/", read_albums, methods=["GET"], response_model=list[AlbumResponse])
+discs_router.add_api_route("/{album_id}", read_album, methods=["GET"], response_model=AlbumResponse)
+discs_router.add_api_route("/", create_new_album, methods=["POST"], response_model=AlbumResponse, status_code=status.HTTP_201_CREATED)
+discs_router.add_api_route("/{album_id}", update_existing_album, methods=["PUT"], response_model=AlbumResponse)
+discs_router.add_api_route("/{album_id}", delete_existing_album, methods=["DELETE"])

@@ -2,63 +2,70 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from models.discs import Disc
-from schemas.discs import DiscCreate, DiscUpdate
+from models.albums import Album
+from schemas.albums import AlbumCreate, AlbumUpdate
 
 # Read Services
-def get_discs(
+def get_albums(
     db: Session,
     genre: str | None = None,
     search: str | None = None
-) -> list[Disc]:
-    query = db.query(Disc)
+) -> list[Album]:
+    query = db.query(Album)
 
     if genre:
-        query = query.filter(Disc.genre.ilike(f"%{genre}%"))
+        query = query.filter(Album.genre.ilike(f"%{genre}%"))
 
     if search:
         search_pattern = f"%{search}%"
         query = query.filter(
             or_(
-                Disc.title.ilike(search_pattern),
-                Disc.artist.ilike(search_pattern)
+                Album.title.ilike(search_pattern),
+                Album.artist.ilike(search_pattern)
             )
         )
 
-    return query.order_by(Disc.id.desc()).all()
+    return query.order_by(Album.id.desc()).all()
 
 
-def get_disc(db: Session, disc_id: int) -> Disc | None:
-    return db.query(Disc).filter(Disc.id == disc_id).first()
+def get_album(db: Session, album_id: int) -> Album | None:
+    return db.query(Album).filter(Album.id == album_id).first()
 
 # Write Services
-def create_disc(db: Session, disc_data: DiscCreate) -> Disc:
-    new_disc = Disc(**disc_data.model_dump())
-    db.add(new_disc)
+def create_album(db: Session, album_data: AlbumCreate) -> Album:
+    new_album = Album(**album_data.model_dump())
+    db.add(new_album)
     db.commit()
-    db.refresh(new_disc)
-    return new_disc
+    db.refresh(new_album)
+    return new_album
 
 
-def update_disc(db: Session, disc_id: int, disc_data: DiscUpdate) -> Disc | None:
-    disc_db = get_disc(db, disc_id)
-    if disc_db is None:
+def update_album(db: Session, album_id: int, album_data: AlbumUpdate) -> Album | None:
+    album_db = get_album(db, album_id)
+    if album_db is None:
         return None
 
-    update_dict = disc_data.model_dump(exclude_unset=True)
+    update_dict = album_data.model_dump(exclude_unset=True)
     for key, value in update_dict.items():
-        setattr(disc_db, key, value)
+        setattr(album_db, key, value)
 
     db.commit()
-    db.refresh(disc_db)
-    return disc_db
+    db.refresh(album_db)
+    return album_db
 
 
-def delete_disc(db: Session, disc_id: int) -> bool:
-    disc_db = get_disc(db, disc_id)
-    if disc_db is None:
+def delete_album(db: Session, album_id: int) -> bool:
+    album_db = get_album(db, album_id)
+    if album_db is None:
         return False
 
-    db.delete(disc_db)
+    db.delete(album_db)
     db.commit()
     return True
+
+# Aliases for backwards compatibility
+get_discs = get_albums
+get_disc = get_album
+create_disc = create_album
+update_disc = update_album
+delete_disc = delete_album
