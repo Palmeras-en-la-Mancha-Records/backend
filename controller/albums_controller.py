@@ -3,8 +3,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
+
+
 
 from models.albums_models import Album
 from schemas.albums import AlbumCreate, AlbumUpdate
@@ -111,17 +111,7 @@ def update_album(
 ) -> Album:
 
     try:
-        album_db = (
-            db.query(Album)
-            .filter(Album.id == album_id)
-            .first()
-        )
-
-        if album_db is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Album not found"
-            )
+        album_db = get_album(db, album_id)
 
         update_dict = album_data.model_dump(
             exclude_unset=True
@@ -153,17 +143,7 @@ def delete_album(
 ) -> None:
 
     try:
-        album_db = (
-            db.query(Album)
-            .filter(Album.id == album_id)
-            .first()
-        )
-
-        if album_db is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Album not found"
-            )
+        album_db = get_album(db, album_id)
 
         db.delete(album_db)
         db.commit()
