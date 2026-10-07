@@ -3,8 +3,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
+
+
 
 from models.albums_models import Album
 from schemas.albums import AlbumCreate, AlbumUpdate
@@ -68,8 +68,7 @@ def get_album(
 
         return album_db
 
-    except HTTPException:
-        raise
+    
 
     except SQLAlchemyError:
         raise HTTPException(
@@ -110,18 +109,10 @@ def update_album(
     album_data: AlbumUpdate
 ) -> Album:
 
-    try:
-        album_db = (
-            db.query(Album)
-            .filter(Album.id == album_id)
-            .first()
-        )
+    album_db = get_album(db, album_id)
 
-        if album_db is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Album not found"
-            )
+    try:
+        
 
         update_dict = album_data.model_dump(
             exclude_unset=True
@@ -135,8 +126,7 @@ def update_album(
 
         return album_db
 
-    except HTTPException:
-        raise
+    
 
     except SQLAlchemyError:
         db.rollback()
@@ -152,28 +142,17 @@ def delete_album(
     album_id: int
 ) -> None:
 
+    album_db = get_album(db, album_id)
+    
     try:
-        album_db = (
-            db.query(Album)
-            .filter(Album.id == album_id)
-            .first()
-        )
-
-        if album_db is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Album not found"
-            )
+        
 
         db.delete(album_db)
         db.commit()
         
-        return {
-        "message": "Album successfully deleted"
-    }
+        
 
-    except HTTPException:
-        raise
+    
 
     except SQLAlchemyError:
         db.rollback()
