@@ -68,8 +68,7 @@ def get_album(
 
         return album_db
 
-    except HTTPException:
-        raise
+    
 
     except SQLAlchemyError:
         raise HTTPException(
@@ -110,8 +109,10 @@ def update_album(
     album_data: AlbumUpdate
 ) -> Album:
 
+    album_db = get_album(db, album_id)
+
     try:
-        album_db = get_album(db, album_id)
+        
 
         update_dict = album_data.model_dump(
             exclude_unset=True
@@ -125,8 +126,7 @@ def update_album(
 
         return album_db
 
-    except HTTPException:
-        raise
+    
 
     except SQLAlchemyError:
         db.rollback()
@@ -142,16 +142,17 @@ def delete_album(
     album_id: int
 ) -> None:
 
+    album_db = get_album(db, album_id)
+    
     try:
-        album_db = get_album(db, album_id)
+        
 
         db.delete(album_db)
         db.commit()
         
         
 
-    except HTTPException:
-        raise
+    
 
     except SQLAlchemyError:
         db.rollback()
