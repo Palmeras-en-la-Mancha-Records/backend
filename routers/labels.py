@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Path, status
 from sqlalchemy.orm import Session
 
-from database.database import get_db
+from core.database import get_db
 from schemas.labels import LabelCreate, LabelResponse, LabelUpdate
 import controller.label_controller as label_controller
 

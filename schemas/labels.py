@@ -16,5 +16,5 @@ class LabelUpdate(LabelBase):
     website: str | None = Field(default=None, min_length=1, max_length=300, description="Official website URL")
 
 class LabelResponse(LabelBase):
-    id: int = Field(..., description="The unique identifier of the label", example=1)
+    id: int = Field(..., description="The unique identifier of the label", json_schema_extra={"example": 1})
     model_config = ConfigDict(from_attributes=True)
