@@ -148,9 +148,7 @@ def delete_album(
         db.delete(album_db)
         db.commit()
         
-        return {
-        "message": "Album successfully deleted"
-    }
+        
 
     except HTTPException:
         raise
