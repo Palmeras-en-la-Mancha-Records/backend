@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from core.database import get_db
 from schemas.branches import BranchCreate, BranchResponse, BranchUpdate
-from controler.branches_controler import (
+from controller.branches_controller import (
     create_branch,
     delete_branch,
     get_branch,
