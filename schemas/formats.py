@@ -1,14 +1,22 @@
 # Imports
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+
 
 # Schemas
 class FormatBase(BaseModel):
-    name: str = Field(
-        ...,
-        min_length=2,
-        max_length=100,
+    name: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=2,
+            max_length=100
+        )
+    ] = Field(
         description="Physical format name"
     )
+
     description: str | None = Field(
         default=None,
         max_length=255,
@@ -21,12 +29,15 @@ class FormatCreate(FormatBase):
 
 
 class FormatUpdate(BaseModel):
-    name: str | None = Field(
-        default=None,
-        min_length=2,
-        max_length=100,
-        description="Physical format name"
-    )
+    name: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=2,
+            max_length=100
+        )
+    ] | None = None
+
     description: str | None = Field(
         default=None,
         max_length=255,
@@ -37,4 +48,6 @@ class FormatUpdate(BaseModel):
 class FormatResponse(FormatBase):
     id: int
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
