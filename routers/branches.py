@@ -1,9 +1,13 @@
 # Imports
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from core.database import get_db
-from schemas.branches import BranchCreate, BranchResponse, BranchUpdate
+from schemas.branches import (
+    BranchCreate,
+    BranchResponse,
+    BranchUpdate
+)
 from controller.branches_controller import (
     create_branch,
     delete_branch,
@@ -39,13 +43,7 @@ def read_branch(
     branch_id: int,
     db: Session = Depends(get_db)
 ):
-    branch = get_branch(db, branch_id)
-    if branch is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Branch not found"
-        )
-    return branch
+    return get_branch(db, branch_id)
 
 
 @router.post(
@@ -70,13 +68,11 @@ def update_existing_branch(
     branch_data: BranchUpdate,
     db: Session = Depends(get_db)
 ):
-    branch = update_branch(db, branch_id, branch_data)
-    if branch is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Branch not found"
-        )
-    return branch
+    return update_branch(
+        db,
+        branch_id,
+        branch_data
+    )
 
 
 @router.delete(
@@ -87,12 +83,8 @@ def delete_existing_branch(
     branch_id: int,
     db: Session = Depends(get_db)
 ):
-    deleted = delete_branch(db, branch_id)
-    if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Branch not found"
-        )
+    delete_branch(db, branch_id)
+
     return {
         "message": "Branch successfully deleted"
     }
