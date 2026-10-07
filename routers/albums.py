@@ -1,9 +1,13 @@
 # Imports
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from core.database import get_db
-from schemas.albums import AlbumCreate, AlbumResponse, AlbumUpdate
+from schemas.albums import (
+    AlbumCreate,
+    AlbumResponse,
+    AlbumUpdate
+)
 from controller.albums_controller import (
     create_album,
     delete_album,
@@ -25,11 +29,21 @@ router = APIRouter(
     status_code=status.HTTP_200_OK
 )
 def read_albums(
-    genre: str | None = Query(default=None, description="Filter by genre"),
-    search: str | None = Query(default=None, description="Search by title or artist"),
+    genre: str | None = Query(
+        default=None,
+        description="Filter by genre"
+    ),
+    search: str | None = Query(
+        default=None,
+        description="Search by title or artist"
+    ),
     db: Session = Depends(get_db)
 ):
-    return get_albums(db, genre=genre, search=search)
+    return get_albums(
+        db,
+        genre=genre,
+        search=search
+    )
 
 
 @router.get(
@@ -66,13 +80,11 @@ def update_existing_album(
     album_data: AlbumUpdate,
     db: Session = Depends(get_db)
 ):
-    album = update_album(db, album_id, album_data)
-    if album is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Album not found"
-        )
-    return album
+    return update_album(
+        db,
+        album_id,
+        album_data
+    )
 
 
 @router.delete(
@@ -83,20 +95,51 @@ def delete_existing_album(
     album_id: int,
     db: Session = Depends(get_db)
 ):
-    deleted = delete_album(db, album_id)
-    if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Album not found"
-        )
+    delete_album(db, album_id)
+
     return {
         "message": "Album successfully deleted"
     }
 
+
 # Backwards compatibility router for /discs
-discs_router = APIRouter(prefix="/discs", tags=["Discs (Legacy)"])
-discs_router.add_api_route("/", read_albums, methods=["GET"], response_model=list[AlbumResponse])
-discs_router.add_api_route("/{album_id}", read_album, methods=["GET"], response_model=AlbumResponse)
-discs_router.add_api_route("/", create_new_album, methods=["POST"], response_model=AlbumResponse, status_code=status.HTTP_201_CREATED)
-discs_router.add_api_route("/{album_id}", update_existing_album, methods=["PUT"], response_model=AlbumResponse)
-discs_router.add_api_route("/{album_id}", delete_existing_album, methods=["DELETE"])
+discs_router = APIRouter(
+    prefix="/discs",
+    tags=["Discs (Legacy)"]
+)
+
+
+discs_router.add_api_route(
+    "/",
+    read_albums,
+    methods=["GET"],
+    response_model=list[AlbumResponse]
+)
+
+discs_router.add_api_route(
+    "/{album_id}",
+    read_album,
+    methods=["GET"],
+    response_model=AlbumResponse
+)
+
+discs_router.add_api_route(
+    "/",
+    create_new_album,
+    methods=["POST"],
+    response_model=AlbumResponse,
+    status_code=status.HTTP_201_CREATED
+)
+
+discs_router.add_api_route(
+    "/{album_id}",
+    update_existing_album,
+    methods=["PUT"],
+    response_model=AlbumResponse
+)
+
+discs_router.add_api_route(
+    "/{album_id}",
+    delete_existing_album,
+    methods=["DELETE"]
+)

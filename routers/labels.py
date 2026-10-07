@@ -4,7 +4,11 @@ from fastapi import APIRouter, Depends, Query, Path, status
 from sqlalchemy.orm import Session
 
 from database.database import get_db
-from schemas.labels import LabelCreate, LabelResponse, LabelUpdate
+from schemas.labels import (
+    LabelCreate,
+    LabelResponse,
+    LabelUpdate
+)
 import controller.label_controller as label_controller
 
 # Router Configuration
@@ -21,11 +25,24 @@ router = APIRouter(
     description="Get a list of all labels in the database."
 )
 def get_all_labels(
-    skip: int = Query(0, ge=0, description="The number of labels to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="The number of labels to retrieve"),
+    skip: int = Query(
+        0,
+        ge=0,
+        description="The number of labels to skip"
+    ),
+    limit: int = Query(
+        100,
+        ge=1,
+        le=1000,
+        description="The number of labels to retrieve"
+    ),
     db: Session = Depends(get_db)
 ):
-    return label_controller.get_all_labels(db=db, skip=skip, limit=limit)
+    return label_controller.get_all_labels(
+        db=db,
+        skip=skip,
+        limit=limit
+    )
 
 
 @router.get(
@@ -35,10 +52,17 @@ def get_all_labels(
     description="Get a single label by its unique ID."
 )
 def get_label(
-    label_id: int = Path(..., ge=1, description="The ID of the label to retrieve"),
+    label_id: int = Path(
+        ...,
+        ge=1,
+        description="The ID of the label to retrieve"
+    ),
     db: Session = Depends(get_db)
 ):
-    return label_controller.get_label_by_id(db=db, label_id=label_id)
+    return label_controller.get_label_by_id(
+        db=db,
+        label_id=label_id
+    )
 
 
 @router.post(
@@ -52,7 +76,10 @@ def create_new_label(
     label_data: LabelCreate,
     db: Session = Depends(get_db)
 ):
-    return label_controller.create_label(db=db, label=label_data)
+    return label_controller.create_label(
+        db=db,
+        label=label_data
+    )
 
 
 @router.put(
@@ -63,10 +90,18 @@ def create_new_label(
 )
 def update_existing_label(
     label_data: LabelUpdate,
-    label_id: int = Path(..., ge=1, description="The ID of the label to update"),
+    label_id: int = Path(
+        ...,
+        ge=1,
+        description="The ID of the label to update"
+    ),
     db: Session = Depends(get_db)
 ):
-    return label_controller.update_label(db=db, label_id=label_id, label_update=label_data)
+    return label_controller.update_label(
+        db=db,
+        label_id=label_id,
+        label_update=label_data
+    )
 
 
 @router.delete(
@@ -76,7 +111,14 @@ def update_existing_label(
     description="Delete an existing label by its unique ID."
 )
 def delete_existing_label(
-    label_id: int = Path(..., ge=1, description="The ID of the label to delete"),
+    label_id: int = Path(
+        ...,
+        ge=1,
+        description="The ID of the label to delete"
+    ),
     db: Session = Depends(get_db)
 ):
-    label_controller.delete_label(db=db, label_id=label_id)
+    label_controller.delete_label(
+        db=db,
+        label_id=label_id
+    )
