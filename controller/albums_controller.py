@@ -1,4 +1,6 @@
 # Imports
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -165,6 +167,10 @@ def delete_album(
 
         db.delete(album_db)
         db.commit()
+        
+        return {
+        "message": "Album successfully deleted"
+    }
 
     except HTTPException:
         raise
