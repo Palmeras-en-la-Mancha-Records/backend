@@ -11,8 +11,25 @@ class LabelBase(BaseModel):
 class LabelCreate(LabelBase):
     pass
 
-class LabelUpdate(LabelBase):
-    pass
+class LabelUpdate(BaseModel):
+    name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=150,
+        description="Name of the record label"
+    )
+    country: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=100,
+        description="Country of origin"
+    )
+    website: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=300,
+        description="Official website URL"
+    )
 
 class LabelResponse(LabelBase):
     id: int = Field(..., description="The unique identifier of the label")
