@@ -8,9 +8,11 @@ from core.config import settings
 import models.branches_models as branch_models
 import models.formats_models as format_models
 import models.albums_models as album_models
+import models.labels_models as label_models
 from routers.albums import router as albums_router, discs_router
 from routers.formats import router as formats_router
 from routers.branches import router as branches_router
+from routers.labels import router as labels_router
 
 # Database Initial Seeding
 def seed_initial_data():
@@ -57,3 +59,4 @@ app.include_router(albums_router)
 app.include_router(discs_router)
 app.include_router(formats_router)
 app.include_router(branches_router)
+app.include_router(labels_router)

@@ -1,164 +1,62 @@
-from typing import List
-from fastapi import HTTPException, status
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from models.labels_models import Label
 from schemas.labels import LabelCreate, LabelUpdate
 
+def get_all_labels(db: Session, skip: int = 0, limit: int = 100) -> list[Label]:
+    return db.query(Label).order_by(Label.id).offset(skip).limit(limit).all()
 
-# Read Operations
-def get_all_labels(
-    db: Session,
-    skip: int = 0,
-    limit: int = 100
-) -> List[Label]:
+def create_label(db: Session, label_data: LabelCreate) -> Label:
+    existing_label = db.query(Label).filter(Label.name == label_data.name).first()
 
-    try:
-        return (
-            db.query(Label)
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
+    if existing_label:
+        raise ValueError(f"A label with name '{label_data.name}' already exists")
 
-    except SQLAlchemyError:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error retrieving labels"
-        )
+    new_label = Label(
+        name=label_data.name,
+        country=label_data.country,
+        website=label_data.website
+    )
+    
+    db.add(new_label)
+    db.commit()
+    db.refresh(new_label)
+    
+    return new_label
 
+def get_label_by_id(db: Session, label_id: int) -> Label | None:
+    return db.query(Label).filter(Label.id == label_id).first()
 
-def get_label_by_id(
-    db: Session,
-    label_id: int
-) -> Label:
+def update_label(db: Session, label_id: int, label_data: LabelUpdate) -> Label | None:
+    db_label = get_label_by_id(db, label_id)
 
-    try:
-        label = (
-            db.query(Label)
-            .filter(Label.id == label_id)
-            .first()
-        )
+    if db_label is None:
+        return None
+    
+    if label_data.name is not None:
+        existing_label = (db.query(Label).filter(Label.name == label_data.name, Label.id != label_id).first())
+        if existing_label:
+            raise ValueError(f"A label with name '{label_data.name}' already exists")
+        db_label.name = label_data.name
 
-        if label is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Label with id {label_id} not found"
-            )
+    if label_data.country is not None:
+        db_label.country = label_data.country
 
-        return label
+    if label_data.website is not None:
+        db_label.website = label_data.website
 
-    except HTTPException:
-        raise
+    db.commit()
+    db.refresh(db_label)
 
-    except SQLAlchemyError:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error retrieving label"
-        )
+    return db_label
 
+def delete_label(db: Session, label_id: int) -> bool:
+    db_label = get_label_by_id(db, label_id)
 
-# Write Operations
-def create_label(
-    db: Session,
-    label: LabelCreate
-) -> Label:
+    if db_label is None:
+        return False
 
-    try:
-        new_label = Label(
-            name=label.name,
-            country=label.country,
-            website=label.website
-        )
+    db.delete(db_label)
+    db.commit()
 
-        db.add(new_label)
-        db.commit()
-        db.refresh(new_label)
-        return new_label
-
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error creating label. The provided data violates a database constraint."
-        )
-
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error creating label"
-        )
-
-
-def update_label(
-    db: Session,
-    label_id: int,
-    label_update: LabelUpdate
-) -> Label:
-
-    try:
-        db_label = get_label_by_id(
-            db,
-            label_id
-        )
-
-        update_data = label_update.model_dump(
-            exclude_unset=True
-        )
-
-        for field, value in update_data.items():
-            setattr(db_label, field, value)
-        db.commit()
-        db.refresh(db_label)
-        return db_label
-
-    except HTTPException:
-        raise
-
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error updating label. The provided data violates a database constraint."
-        )
-
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error updating label"
-        )
-
-def delete_label(
-    db: Session,
-    label_id: int
-) -> None:
-
-    try:
-        db_label = get_label_by_id(
-            db,
-            label_id
-        )
-
-        db.delete(db_label)
-        db.commit()
-
-    except HTTPException:
-        raise
-
-    except IntegrityError:
-        db.rollback()
-
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Error deleting label. The label cannot be deleted because it is being used."
-        )
-
-    except SQLAlchemyError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error deleting label"
-        )
+    return True
