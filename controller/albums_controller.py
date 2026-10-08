@@ -1,67 +1,167 @@
 # Imports
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
+from sqlalchemy.exc import SQLAlchemyError
 
-from models.albums import Album
+
+
+from models.albums_models import Album
 from schemas.albums import AlbumCreate, AlbumUpdate
 
-# Read Services
+
+# Read Operations
 def get_albums(
     db: Session,
     genre: str | None = None,
     search: str | None = None
 ) -> list[Album]:
-    query = db.query(Album)
 
-    if genre:
-        query = query.filter(Album.genre.ilike(f"%{genre}%"))
+    try:
+        query = db.query(Album)
 
-    if search:
-        search_pattern = f"%{search}%"
-        query = query.filter(
-            or_(
-                Album.title.ilike(search_pattern),
-                Album.artist.ilike(search_pattern)
+        if genre:
+            query = query.filter(
+                Album.genre.ilike(f"%{genre}%")
             )
+
+        if search:
+            search_pattern = f"%{search}%"
+
+            query = query.filter(
+                or_(
+                    Album.title.ilike(search_pattern),
+                    Album.artist.ilike(search_pattern)
+                )
+            )
+
+        return (
+            query
+            .order_by(Album.id.desc())
+            .all()
         )
 
-    return query.order_by(Album.id.desc()).all()
+    except SQLAlchemyError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error retrieving albums"
+        )
 
 
-def get_album(db: Session, album_id: int) -> Album | None:
-    return db.query(Album).filter(Album.id == album_id).first()
+def get_album(
+    db: Session,
+    album_id: int
+) -> Album:
 
-# Write Services
-def create_album(db: Session, album_data: AlbumCreate) -> Album:
-    new_album = Album(**album_data.model_dump())
-    db.add(new_album)
-    db.commit()
-    db.refresh(new_album)
-    return new_album
+    try:
+        album_db = (
+            db.query(Album)
+            .filter(Album.id == album_id)
+            .first()
+        )
+
+        if album_db is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Album not found"
+            )
+
+        return album_db
+
+    
+
+    except SQLAlchemyError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error retrieving album"
+        )
 
 
-def update_album(db: Session, album_id: int, album_data: AlbumUpdate) -> Album | None:
+# Write Operations
+def create_album(
+    db: Session,
+    album_data: AlbumCreate
+) -> Album:
+
+    try:
+        new_album = Album(
+            **album_data.model_dump()
+        )
+
+        db.add(new_album)
+        db.commit()
+        db.refresh(new_album)
+
+        return new_album
+
+    except SQLAlchemyError:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error creating album"
+        )
+
+
+def update_album(
+    db: Session,
+    album_id: int,
+    album_data: AlbumUpdate
+) -> Album:
+
     album_db = get_album(db, album_id)
-    if album_db is None:
-        return None
 
-    update_dict = album_data.model_dump(exclude_unset=True)
-    for key, value in update_dict.items():
-        setattr(album_db, key, value)
+    try:
+        
 
-    db.commit()
-    db.refresh(album_db)
-    return album_db
+        update_dict = album_data.model_dump(
+            exclude_unset=True
+        )
+
+        for key, value in update_dict.items():
+            setattr(album_db, key, value)
+
+        db.commit()
+        db.refresh(album_db)
+
+        return album_db
+
+    
+
+    except SQLAlchemyError:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error updating album"
+        )
 
 
-def delete_album(db: Session, album_id: int) -> bool:
+def delete_album(
+    db: Session,
+    album_id: int
+) -> None:
+
     album_db = get_album(db, album_id)
-    if album_db is None:
-        return False
+    
+    try:
+        
 
-    db.delete(album_db)
-    db.commit()
-    return True
+        db.delete(album_db)
+        db.commit()
+        
+        
+
+    
+
+    except SQLAlchemyError:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error deleting album"
+        )
+
 
 # Aliases for backwards compatibility
 get_discs = get_albums

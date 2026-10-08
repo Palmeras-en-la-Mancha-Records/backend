@@ -1,21 +1,75 @@
 # Imports
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+
 
 # Schemas
 class BranchBase(BaseModel):
-    name: str = Field(min_length=1, max_length=100)
-    address: str = Field(min_length=1, max_length=255)
-    phone: str = Field(min_length=1, max_length=30)
+    name: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=1,
+            max_length=100
+        )
+    ]
+
+    address: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=1,
+            max_length=255
+        )
+    ]
+
+    phone: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=1,
+            max_length=30
+        )
+    ]
+
 
 class BranchCreate(BranchBase):
     pass
 
+
 class BranchUpdate(BaseModel):
-    name: str | None = Field(default=None, min_length=1, max_length=100)
-    address: str | None = Field(default=None, min_length=1, max_length=255)
-    phone: str | None = Field(default=None, min_length=1, max_length=30)
+    name: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=1,
+            max_length=100
+        )
+    ] | None = None
+
+    address: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=1,
+            max_length=255
+        )
+    ] | None = None
+
+    phone: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=1,
+            max_length=30
+        )
+    ] | None = None
+
 
 class BranchResponse(BranchBase):
     id: int
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )

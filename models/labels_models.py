@@ -1,7 +1,8 @@
+# Imports
 from sqlalchemy import Column, Integer, String
 from core.database import Base
 
-
+# Models
 class Label(Base):
     __tablename__ = "labels"
 

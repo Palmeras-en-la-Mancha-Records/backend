@@ -1,17 +1,74 @@
 # Imports
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated
+
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+
 
 # Schemas
 class AlbumBase(BaseModel):
-    title: str = Field(..., min_length=1, max_length=150, description="Title of the album")
-    artist: str = Field(..., min_length=1, max_length=150, description="Artist or musical band")
-    release_year: int | None = Field(default=None, ge=1900, le=2100, description="Release year")
-    genre: str | None = Field(default=None, max_length=100, description="Musical genre")
-    record_label: str | None = Field(default=None, max_length=100, description="Record label")
-    price: float = Field(default=0.0, ge=0.0, description="Album price")
-    stock: int | None = Field(default=0, ge=0, description="Available stock")
-    format_id: int | None = Field(default=None, description="Format identifier")
-    cover_image_url: str | None = Field(default=None, description="Cover image URL or path")
+    title: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=1,
+            max_length=150
+        )
+    ] = Field(
+        description="Title of the album"
+    )
+
+    artist: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=1,
+            max_length=150
+        )
+    ] = Field(
+        description="Artist or musical band"
+    )
+
+    release_year: int | None = Field(
+        default=None,
+        ge=1900,
+        le=2100,
+        description="Release year"
+    )
+
+    genre: str | None = Field(
+        default=None,
+        max_length=100,
+        description="Musical genre"
+    )
+
+    record_label: str | None = Field(
+        default=None,
+        max_length=100,
+        description="Record label"
+    )
+
+    price: float = Field(
+        default=0.0,
+        ge=0.0,
+        description="Album price"
+    )
+
+    stock: int | None = Field(
+        default=0,
+        ge=0,
+        description="Available stock"
+    )
+
+    format_id: int | None = Field(
+        default=None,
+        description="Format identifier"
+    )
+
+    cover_image_url: str | None = Field(
+        default=None,
+        description="Cover image URL or path"
+    )
+
 
 class AlbumCreate(AlbumBase):
     model_config = ConfigDict(
@@ -30,21 +87,64 @@ class AlbumCreate(AlbumBase):
         }
     )
 
+
 class AlbumUpdate(BaseModel):
-    title: str | None = Field(default=None, min_length=1, max_length=150)
-    artist: str | None = Field(default=None, min_length=1, max_length=150)
-    release_year: int | None = Field(default=None, ge=1900, le=2100)
-    genre: str | None = Field(default=None, max_length=100)
-    record_label: str | None = Field(default=None, max_length=100)
-    price: float | None = Field(default=None, ge=0.0)
-    stock: int | None = Field(default=None, ge=0)
+    title: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=1,
+            max_length=150
+        )
+    ] | None = None
+
+    artist: Annotated[
+        str,
+        StringConstraints(
+            strip_whitespace=True,
+            min_length=1,
+            max_length=150
+        )
+    ] | None = None
+
+    release_year: int | None = Field(
+        default=None,
+        ge=1900,
+        le=2100
+    )
+
+    genre: str | None = Field(
+        default=None,
+        max_length=100
+    )
+
+    record_label: str | None = Field(
+        default=None,
+        max_length=100
+    )
+
+    price: float | None = Field(
+        default=None,
+        ge=0.0
+    )
+
+    stock: int | None = Field(
+        default=None,
+        ge=0
+    )
+
     format_id: int | None = None
+
     cover_image_url: str | None = None
+
 
 class AlbumResponse(AlbumBase):
     id: int
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
 
 # Aliases for backwards compatibility
 DiscBase = AlbumBase

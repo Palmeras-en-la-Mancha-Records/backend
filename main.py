@@ -5,9 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.database import Base, engine, SessionLocal
 from core.config import settings
-import models.branches as branch_models
-import models.formats as format_models
-import models.albums as album_models
+import models.branches_models as branch_models
+import models.formats_models as format_models
+import models.albums_models as album_models
 import models.labels_models as label_models
 from routers.albums import router as albums_router, discs_router
 from routers.formats import router as formats_router

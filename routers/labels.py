@@ -78,7 +78,11 @@ def update_existing_label(
     db: Session = Depends(get_db)
 ):
     try:
-        label_db = label_controller.update_label(db, label_id, label_data)
+        label_db = label_controller.update_label(
+            db=db,
+            label_id=label_id,
+            label_update=label_data
+        )
     except ValueError as error:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

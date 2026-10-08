@@ -1,5 +1,5 @@
 # Imports
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from core.database import get_db
@@ -43,15 +43,7 @@ def read_format(
     format_id: int,
     db: Session = Depends(get_db)
 ):
-    format_db = get_format(db, format_id)
-
-    if format_db is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Format not found"
-        )
-
-    return format_db
+    return get_format(db, format_id)
 
 
 @router.post(
@@ -63,14 +55,7 @@ def create_new_format(
     format_data: FormatCreate,
     db: Session = Depends(get_db)
 ):
-    try:
-        return create_format(db, format_data)
-
-    except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error)
-        )
+    return create_format(db, format_data)
 
 
 @router.put(
@@ -83,26 +68,11 @@ def update_existing_format(
     format_data: FormatUpdate,
     db: Session = Depends(get_db)
 ):
-    try:
-        format_db = update_format(
-            db,
-            format_id,
-            format_data
-        )
-
-    except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error)
-        )
-
-    if format_db is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Format not found"
-        )
-
-    return format_db
+    return update_format(
+        db,
+        format_id,
+        format_data
+    )
 
 
 @router.delete(
@@ -113,13 +83,7 @@ def delete_existing_format(
     format_id: int,
     db: Session = Depends(get_db)
 ):
-    deleted = delete_format(db, format_id)
-
-    if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Format not found"
-        )
+    delete_format(db, format_id)
 
     return {
         "message": "Format deleted successfully"
